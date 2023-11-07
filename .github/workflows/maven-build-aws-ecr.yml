@@ -57,7 +57,4 @@ jobs:
         docker build --file ./futuionsales/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-    
-            # Run the new container
-            ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@3.84.104.198 "docker run -d -p 8080:8080 --name java-backend-dev $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-        
+  
