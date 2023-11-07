@@ -75,9 +75,14 @@ jobs:
         
               # Check the Docker daemon status
               sudo systemctl status docker
+              # Debug output: Print the values of variables
+              echo "ECR_REGISTRY: $ECR_REGISTRY"
+              echo "ECR_REPOSITORY: $ECR_REPOSITORY"
+              echo "IMAGE_TAG: $IMAGE_TAG"
         
         # Pull the new Docker image from ECR
         ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@3.84.104.198 "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        echo "Docker pull exit code: $?
 
         # Run the new container
         ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@3.84.104.198 "docker run -d -p 8080:8080 --name java-backend-dev $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
