@@ -5,14 +5,15 @@
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
-
 name: Java CI with Maven
 
 on:
   push:
-    branches: [ "dev" ]
+    branches:
+      - dev
   pull_request:
-    branches: [ "dev" ]
+    branches:
+      - dev
 
 jobs:
   build:
@@ -21,23 +22,18 @@ jobs:
 
     steps:
     - name: Check out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
+
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v2
       with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-        
+        java-version: 17
+
     - name: Build with Maven
       run: mvn -B package --file ./futuionsales/pom.xml
 
-    # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
-    #- name: Update dependency graph
-    #  uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b9691de18d6b7d6
-
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -45,8 +41,8 @@ jobs:
 
     - name: Login to Amazon ECR
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
-      
+      uses: aws-actions/amazon-ecr-login@v1
+
     - name: Get the current commit SHA
       id: commit-sha
       run: echo "::set-output name=commit_sha::$(git rev-parse --short HEAD)"
@@ -56,10 +52,10 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: java-backend-dev
         IMAGE_TAG: ${{ steps.commit-sha.outputs.commit_sha }}
-        aws-private-key: ${{ secrets.AWS_PRIVATE_KEY }}
       run: |
         docker build --file ./futuionsales/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
     - name: Set permissions for SSH private key
       run: |
         echo "${{ secrets.AWS_PRIVATE_KEY }}" > ssh_key.pem
@@ -70,19 +66,30 @@ jobs:
         # Replace EC2_IP_ADDRESS with the actual IP address of your EC2 instance
         echo "${{ secrets.AWS_PRIVATE_KEY }}" > ssh_key.pem
         chmod 600 ssh_key.pem
+
         # Ensure the Docker daemon is running
-              sudo systemctl start docker
-        
-              # Check the Docker daemon status
-              sudo systemctl status docker
-              # Debug output: Print the values of variables
-              echo "ECR_REGISTRY: $ECR_REGISTRY"
-              echo "ECR_REPOSITORY: $ECR_REPOSITORY"
-              echo "IMAGE_TAG: $IMAGE_TAG"
-        
+        sudo systemctl start docker
+
+        # Check the Docker daemon status
+        sudo systemctl status docker
+
+        # Debug output: Print the values of variables
+        echo "ECR_REGISTRY: $ECR_REGISTRY"
+        echo "ECR_REPOSITORY: $ECR_REPOSITORY"
+        echo "IMAGE_TAG: $IMAGE_TAG"
+
         # Pull the new Docker image from ECR
-            ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@3.84.104.198 "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-            echo "Docker pull exit code: $?"
+        ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@3.84.104.198 "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+        # Check the exit code of the Docker pull command
+        if [ $? -ne 0 ]; then
+          echo "Docker pull failed."
+          exit 1
+        fi
+
+        # Run the new container
+        ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@3.84.104.198 "docker run -d -p 8080:8080 --name java-backend-dev $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
     
             # Run the new container
             ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@3.84.104.198 "docker run -d -p 8080:8080 --name java-backend-dev $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
