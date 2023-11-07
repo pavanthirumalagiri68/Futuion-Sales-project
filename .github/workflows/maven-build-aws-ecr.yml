@@ -72,8 +72,8 @@ jobs:
         chmod 600 ssh_key.pem
         
         # Pull the new Docker image from ECR
-        ssh -i ssh_key.pem ec2-user@3.84.104.198 "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@3.84.104.198 "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
         # Run the new container
-        ssh -i ssh_key.pem ec2-user@3.84.104.198 "docker run -d -p 8080:8080 --name java-backend-dev $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@3.84.104.198 "docker run -d -p 8080:8080 --name java-backend-dev $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
     
