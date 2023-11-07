@@ -57,40 +57,6 @@ jobs:
         docker build --file ./futuionsales/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-    - name: Set permissions for SSH private key
-      run: |
-        echo "${{ secrets.AWS_PRIVATE_KEY }}" > ssh_key.pem
-        chmod 600 ssh_key.pem
-
-    - name: Deploy container to AWS EC2
-      run: |
-        # Replace EC2_IP_ADDRESS with the actual IP address of your EC2 instance
-        echo "${{ secrets.AWS_PRIVATE_KEY }}" > ssh_key.pem
-        chmod 600 ssh_key.pem
-
-        # Ensure the Docker daemon is running
-        sudo systemctl start docker
-
-        # Check the Docker daemon status
-        sudo systemctl status docker
-
-        # Debug output: Print the values of variables
-        echo "ECR_REGISTRY: $ECR_REGISTRY"
-        echo "ECR_REPOSITORY: $ECR_REPOSITORY"
-        echo "IMAGE_TAG: $IMAGE_TAG"
-
-        # Pull the new Docker image from ECR
-        ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@3.84.104.198 "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-
-        # Check the exit code of the Docker pull command
-        if [ $? -ne 0 ]; then
-          echo "Docker pull failed."
-          exit 1
-        fi
-
-        # Run the new container
-        ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@3.84.104.198 "docker run -d -p 8080:8080 --name java-backend-dev $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-
     
             # Run the new container
             ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@3.84.104.198 "docker run -d -p 8080:8080 --name java-backend-dev $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
