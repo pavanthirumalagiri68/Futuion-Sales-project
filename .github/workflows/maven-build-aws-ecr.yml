@@ -48,7 +48,7 @@ jobs:
       run: docker push tpavan997/testing:latest
       
     - name: Set Kubernetes context
-      uses: Azure/aks-set-context@v1
+
       with:
         creds: ${{ secrets.KUBE_CONFIG }}
     - name: configure kubectl
@@ -61,8 +61,7 @@ jobs:
       uses: Azure/k8s-deploy@v1
       with:
         manifests: |
-          k8s/deployment.yaml
-          k8s/service.yaml
+          deployment.yaml
 
 
 
