@@ -47,10 +47,11 @@ jobs:
     - name: Push Docker image to Docker Hub
       run: docker push tpavan997/testing:latest
       
-    - name: Set Kubernetes context
+    - name: install kubectl
+      run: | 
+        sudo apt-get update -q
+        sudo apt-get install  -y kubectl
 
-      with:
-        creds: ${{ secrets.KUBE_CONFIG }}
     - name: configure kubectl
       run: |
         echo "$KUBE_CONFIG" > kubeconfig
