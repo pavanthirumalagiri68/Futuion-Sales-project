@@ -41,11 +41,11 @@ jobs:
         
     - name: Build and tag Docker image
       run: |
-          docker build --file ./futuionsales/Dockerfile  -t tpavan997/myapp:latest .
-          docker tag tpavan997/myapp:latest myusername/myapp:1.0
+          docker build --file ./futuionsales/Dockerfile  -t tpavan997/testing:latest .
+          docker tag tpavan997/testing:latest tpavan997/testing:1.0
 
     - name: Push Docker image to Docker Hub
-      run: docker push tpavan997/myapp:latest
+      run: docker push tpavan997/testing:latest
       
     - name: Set Kubernetes context
       uses: Azure/aks-set-context@v1
