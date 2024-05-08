@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: test
-        image: testing:latest
+        image: tpavan997/myapp:latest
         ports:
         - containerPort: 80
