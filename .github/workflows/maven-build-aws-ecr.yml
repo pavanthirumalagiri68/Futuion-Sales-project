@@ -53,7 +53,7 @@ jobs:
         creds: ${{ secrets.KUBE_CONFIG }}
     - name: configure kubectl
       run: |
-        echo ""$KUBE_CONFIG" > kubeconfig
+        echo "$KUBE_CONFIG" > kubeconfig
         mkdir -p ~/.kube
         mv kubeconfig ~/.kube/config
         
