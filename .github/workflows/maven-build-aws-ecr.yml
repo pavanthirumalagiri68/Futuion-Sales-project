@@ -51,8 +51,12 @@ jobs:
       uses: Azure/aks-set-context@v1
       with:
         creds: ${{ secrets.KUBE_CONFIG }}
-
-
+    - name: configure kubectl
+      run: |
+        echo ""$KUBE_CONFIG" > kubeconfig
+        mkdir -p ~/.kube
+        mv kubeconfig ~/.kube/config
+        
     - name: Deploy to Kubernetes
       uses: Azure/k8s-deploy@v1
       with:
